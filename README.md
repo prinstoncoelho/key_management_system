@@ -1,158 +1,109 @@
-Key Management System (KMS) - Cryptographic Module
-Overview
-This Python module implements a comprehensive Key Management System (KMS) that provides secure cryptographic operations including symmetric and asymmetric encryption, key generation, and key management. The system is built using the cryptography library from Python's Hazmat (Hazardous Materials) primitives, ensuring robust security implementations.
+# Cryptographic Key Management System
 
-Features
-Symmetric Key Management
+## Overview
+The **Cryptographic Key Management System** is a Python-based utility designed to provide secure key management for encryption and decryption tasks. It supports **AES (Advanced Encryption Standard)** for symmetric encryption, **RSA (Rivest-Shamir-Adleman)** for asymmetric encryption, and **Diffie-Hellman** for secure key exchange. The system also includes a **key revocation** feature to remove keys from the repository when no longer needed.
 
-AES-256 encryption/decryption (CBC mode)
+## Features
+- **AES Encryption/Decryption**
+  - Uses **256-bit AES in CBC mode** with **PKCS7 padding**
+  - Secure key generation using `secrets.token_bytes(32)`
+  - Securely encrypts and decrypts data
+- **RSA Key Pair Generation**
+  - Generates **2048-bit RSA keys**
+  - Encrypts and decrypts data using **PKCS1v15 padding**
+  - Provides a **public-private key vault** for managing keys
+- **Diffie-Hellman Key Exchange**
+  - Generates **Diffie-Hellman parameters and key pairs**
+  - Enables secure key exchange without direct transmission of keys
+- **Key Revocation Mechanism**
+  - Supports deletion of AES and RSA keys
+  - Prevents unauthorized use of revoked keys
 
-Secure key generation using secrets module
-
-Key storage and retrieval
-
-Asymmetric Key Management
-
-RSA key pair generation (2048-bit)
-
-RSA encryption/decryption with PKCS1v15 padding
-
-Public/private key storage
-
-Key Exchange
-
-Diffie-Hellman parameter and key generation (2048-bit)
-
-Key Lifecycle Management
-
-Secure key revocation
-
-In-memory key storage (for demonstration purposes)
-
-Security Considerations
-Uses cryptographically secure random number generation (secrets module)
-
-Implements proper padding schemes (PKCS7 for AES, PKCS1v15 for RSA)
-
-Generates fresh initialization vectors (IVs) for each AES encryption
-
-Follows best practices for key sizes:
-
-AES-256 for symmetric encryption
-
-RSA-2048 for asymmetric operations
-
-DH-2048 for key exchange
-
-Installation
-Ensure you have Python 3.6+ installed
-
-Install the required dependencies:
-
-bash
-Copy
+## Prerequisites
+To use this system, install Python and the `cryptography` package:
+```sh
 pip install cryptography
-Usage
-Initialization
-python
-Copy
-from kms_module import KeyCustodian
+```
 
-kms = KeyCustodian()
-Symmetric Encryption (AES)
-python
-Copy
-# Generate and store an AES key
-key_id = "secure_channel_1"
-kms.establish_aes_key(key_id)
+## Usage Guide
 
-# Encrypt data
-encrypted = kms.encrypt_data_aes(key_id, "Top secret message")
+### 1. Initialize the Key Management System
+```python
+from key_management import KeyCustodian
 
-# Decrypt data
-decrypted = kms.decrypt_data_aes(key_id, encrypted)
-Asymmetric Encryption (RSA)
-python
-Copy
-# Generate RSA key pair
-user = "alice"
-kms.generate_rsa_pair(user)
+kms_instance = KeyCustodian()
+```
 
-# Encrypt data with public key
-encrypted = kms.encrypt_data_rsa(user, "Confidential data")
+### 2. Generate and Use an AES Key
+#### Step 1: Create an AES Key
+```python
+aes_key_id = "terminal_123"
+secure_aes_key = kms_instance.establish_aes_key(aes_key_id)
+print("AES Key Established:", secure_aes_key)
+```
+#### Step 2: Encrypt Data with AES
+```python
+aes_encrypted_text = kms_instance.encrypt_data_aes(aes_key_id, "Confidential Communication")
+print("AES Encrypted Text:", aes_encrypted_text)
+```
+#### Step 3: Decrypt Data with AES
+```python
+aes_decrypted_text = kms_instance.decrypt_data_aes(aes_key_id, aes_encrypted_text)
+print("Decrypted AES Text:", aes_decrypted_text)  # Output: Confidential Communication
+```
 
-# Decrypt with private key
-decrypted = kms.decrypt_data_rsa(user, encrypted)
-Diffie-Hellman Key Exchange
-python
-Copy
-# Generate DH parameters and keys
-private_key, public_key = kms.generate_diffie_hellman_params_and_key()
-Key Revocation
-python
-Copy
-# Revoke a key
-result = kms.invalidate_key("secure_channel_1")
-Important Notes
-Production Use: This implementation stores keys in memory (dictionaries) for demonstration purposes. In a production environment, you would want to:
+### 3. Generate an RSA Key Pair and Encrypt/Decrypt Data
+#### Step 1: Generate RSA Key Pair
+```python
+rsa_user = "systemRSA"
+kms_instance.generate_rsa_pair(rsa_user)
+```
+#### Step 2: Encrypt Data with RSA
+```python
+rsa_encrypted_data = kms_instance.encrypt_data_rsa(rsa_user, "Classified Information")
+print("RSA Encrypted Data:", rsa_encrypted_data)
+```
+#### Step 3: Decrypt Data with RSA
+```python
+rsa_decrypted_data = kms_instance.decrypt_data_rsa(rsa_user, rsa_encrypted_data)
+print("Decrypted RSA Text:", rsa_decrypted_data)  # Output: Classified Information
+```
 
-Use secure key storage solutions
+### 4. Generate Diffie-Hellman Parameters and Key Pair
+```python
+dh_private_key, dh_public_key = kms_instance.generate_diffie_hellman_params_and_key()
+print("Diffie-Hellman Public Key:", dh_public_key)
+```
 
-Implement proper key rotation policies
+### 5. Key Revocation
+#### Step 1: Revoke an AES or RSA Key
+```python
+revocation_result = kms_instance.invalidate_key(aes_key_id)
+print("Revocation Result:", revocation_result)  # Expected: Key Revocation Successful
+```
+#### Step 2: Attempt to Decrypt Data After Key Revocation
+```python
+try:
+    kms_instance.decrypt_data_aes(aes_key_id, aes_encrypted_text)
+except Exception as e:
+    print("Expected error after key revocation:", e)
+```
 
-Add secure key backup mechanisms
+## Security Considerations
+- **Strong Key Generation**: Uses `secrets.token_bytes` for secure key generation.
+- **Secure Storage**: Keys are stored in memory and not written to disk.
+- **Padding Mechanisms**: Uses **PKCS7** for AES and **PKCS1v15** for RSA encryption.
+- **Key Revocation**: Prevents unauthorized access by deleting keys from memory.
 
-Key Protection: The current implementation doesn't encrypt stored keys. In production, you should encrypt keys-at-rest using a master key or HSM.
+## Best Practices
+- Use **environment variables** or **secure vaults** to store keys securely instead of memory storage.
+- Consider **AES-GCM** for authenticated encryption instead of AES-CBC.
+- Regularly rotate keys and revoke unused ones to enhance security.
+- Log encryption/decryption operations securely without exposing sensitive data.
 
-Error Handling: The current implementation has basic error handling. Production systems should include comprehensive error handling and logging.
+## License
+This project is licensed under the **MIT License**.
 
-Performance: RSA operations are computationally expensive. For large data, consider hybrid encryption (RSA for key exchange + AES for data encryption).
+## Author
+Your Name
 
-Testing
-The module includes built-in test cases that demonstrate:
-
-AES encryption/decryption cycle
-
-RSA encryption/decryption cycle
-
-Diffie-Hellman parameter generation
-
-Key revocation functionality
-
-To run the tests, simply execute the module.
-
-Limitations
-Persistence: Keys are not persisted to disk/database
-
-Access Control: No role-based access control for keys
-
-Audit Logging: No logging of key usage
-
-Key Rotation: No automatic key rotation mechanism
-
-Future Enhancements
-Add support for elliptic curve cryptography (ECDSA, ECDH)
-
-Implement key versioning and rotation
-
-Add secure key storage backend
-
-Implement key usage audit logging
-
-Add support for hardware security modules (HSMs)
-
-Security Best Practices
-When deploying this or any cryptographic system:
-
-Protect Keys: Store keys securely using appropriate mechanisms
-
-Rotate Keys: Implement regular key rotation policies
-
-Least Privilege: Restrict access to keys based on need
-
-Audit: Log all key usage and access
-
-Validate: Regularly test your cryptographic implementation
-
-License
-This implementation is provided for educational purposes. For production use, ensure you understand all security implications and consider professional cryptographic consultation.
