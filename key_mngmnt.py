@@ -123,8 +123,3 @@ try:
 except Exception as e:
     print("Expected error after key revocation:", e)
      
-Decrypted AES: Confidential Communication
-Decrypted RSA: Classified Information
-DH Public Key: <cryptography.hazmat.bindings._rust.openssl.dh.DHPublicKey object at 0x7b7f8f0456b0>
-Revocation Result: Key Revocation Successful
-Expected error after key revocation: 'terminal_123'
